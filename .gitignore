@@ -19,5 +19,5 @@ private_key.pem
 public_key.pem
 secret.key
 locustfile.py
-
+nosql/
 
