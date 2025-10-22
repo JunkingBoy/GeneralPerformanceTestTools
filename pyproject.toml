@@ -1,0 +1,12 @@
+[project]
+name = "python-general-performance-test-tools"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "cryptography==46.0.3",
+    "openpyxl==3.1.5",
+    "pandas==2.3.2",
+    "rich>=14.2.0",
+]

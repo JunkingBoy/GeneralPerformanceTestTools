@@ -1,0 +1,23 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+test.py
+logs/
+csv_template/
+user_lifecycle_results_20251020_223928.csv
+user_lifecycle_results_20251020_223928_report.xlsx
+.env
+test.csv
+private_key.pem
+public_key.pem
+secret.key
+locustfile.py
+
+
