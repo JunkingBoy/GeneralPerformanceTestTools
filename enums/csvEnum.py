@@ -15,8 +15,8 @@ class CsvMetaEnum(Enum):
         return False
 
 class CsvHeaderEnum(Enum):
-    USERNAME = "username"
-    PASSWORD = "password"
+    USERNAME = "登录账号"
+    PASSWORD = "登录密码"
 
     @classmethod
     def get_headers_str(cls) -> str:
