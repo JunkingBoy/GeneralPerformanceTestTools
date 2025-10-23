@@ -117,11 +117,11 @@ class UnitEncry:
             self._e.info("签名验证成功")
             return True
         except InvalidSignature as e:
-            self._e.info("签名验证失败,无效的签名")
+            self._e.info("签名验证失败,无效的签名: %s", signature)
             return False
         except ValueError as e:
             self._e.handle_exception(e)
-            self._e.info("签名验证失败,值错误")
+            self._e.info("签名验证失败,值错误: %s", signature)
             return False
         except Exception as e:
             self._e.handle_exception(e)
