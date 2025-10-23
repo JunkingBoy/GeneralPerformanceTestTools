@@ -11,3 +11,4 @@ class LogLabelEnum(Enum):
     AUTH = "🔒"
     TEST = "🧪"
     SAVE = "💾"
+    SIGNATURE = "🔑"
