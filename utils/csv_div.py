@@ -1,5 +1,6 @@
 import os
 import csv
+import copy
 import threading
 
 from pathlib import Path
@@ -88,12 +89,14 @@ class CsvCore:
             meta_sig: str = ""
             meta_pub: str = ""
             meta_header: list = []
+            row_count: int = 0
             # 只取前三行数据进行数据校验
             for row in reader:
+                row_count += 1
                 if row[0].startswith(f"#{CsvMetaEnum.SIG.value}"): meta_sig = row[0].split(":")[1].strip()
                 elif row[0].startswith(f"#{CsvMetaEnum.PUB_ENCRY_KEY.value}"): meta_pub = row[0].split(":")[1].strip()
                 elif row[0].startswith("#"): continue
-                else: meta_header = row
+                elif row_count == 3 and not row[0].startswith("#") : meta_header = row
             if not meta_sig or not meta_pub or not meta_header:
                 self._e.error("%s csv文件错误", LogLabelEnum.UNSPORTED.value)
                 return False
@@ -111,3 +114,48 @@ class CsvCore:
             self._e.handle_exception(err)
             self._e.error("%s 验证csv文件失败", LogLabelEnum.ERROR.value)
             return False
+
+    def _get_csv_data(self, csv_file: str) -> list:
+        if not csv_file: 
+            self._e.error("%s csv文件名为空", LogLabelEnum.ERROR.value)
+            return []
+        if not os.path.exists(csv_file):
+            self._e.error("%s csv文件不存在", LogLabelEnum.ERROR.value)
+            return []
+        if not self._is_source_csv(csv_file): return []
+        try:
+            csv_bytes: bytes = Path(csv_file).read_bytes()
+            lines: list = csv_bytes.decode("utf-8").splitlines()
+            reader = csv.reader(lines)
+            header_list: list = []
+            row_count: int = 0
+            for row in reader:
+                row_count += 1
+                if row_count <= 3: continue
+                header_list.append(row)
+            return copy.deepcopy(header_list)
+        except Exception as err:
+            self._e.handle_exception(err)
+            self._e.error("%s 获取csv数据失败", LogLabelEnum.ERROR.value)
+            return []
+
+class CsvOperator:
+    def __init__(self) -> None:
+        raise RuntimeError("操作类不允许通过构造器实例化")
+    
+    @classmethod
+    def create(cls) -> 'CsvOperator':
+        csv_core: CsvCore = CsvCore.get_instance()
+        csv_op: CsvOperator = cls.__new__(cls)
+        csv_op._csv_core: CsvCore = csv_core # type: ignore
+        return csv_op
+
+    def generate_csv_template(self) -> None:
+        return self._csv_core._set_csv_meta_data() # type: ignore
+
+    def validate_csv(self, csv_file: str) -> bool:
+        return self._csv_core._is_source_csv(csv_file) # type: ignore
+
+    def get_csv_data(self, csv_file: str) -> list:
+        return self._csv_core._get_csv_data(csv_file) # type: ignore
+
