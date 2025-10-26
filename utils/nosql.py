@@ -21,11 +21,14 @@ class NosqlCore:
                 if not NosqlCore.__instance: NosqlCore.__instance = NosqlCore()
             return NosqlCore.__instance
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        e: ExceptionLog = ExceptionLog.get_instance(),
+    ) -> None:
         if hasattr(self, "__initialized") and self.__initialized:
             return
         else:
-            self._e: ExceptionLog = ExceptionLog.get_instance()
+            self._e: ExceptionLog = e
             self._data_folder: str = "nosql"
             self._data_file: str = "user_data.json"
             self._init_nosql()

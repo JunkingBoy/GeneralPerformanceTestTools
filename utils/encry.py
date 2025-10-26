@@ -17,8 +17,11 @@ class UnitEncry:
     1、密钥管理 - 生成密钥和读取已有密钥
     2、加密解密 - 加密解密内容判断
     '''
-    def __init__(self) -> None:
-        self._e: ExceptionLog = ExceptionLog.get_instance()
+    def __init__(
+        self,
+        e: ExceptionLog = ExceptionLog.get_instance(),
+    ) -> None:
+        self._e: ExceptionLog = e
         self._init_encryp_key()
         self._generate_rsa_key_file()
 
