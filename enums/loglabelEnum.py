@@ -12,3 +12,4 @@ class LogLabelEnum(Enum):
     TEST = "🧪"
     SAVE = "💾"
     SIGNATURE = "🔑"
+    RETRY = "🔄"
