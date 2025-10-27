@@ -78,7 +78,7 @@ class NosqlCore:
             tmp_meta_data: dict = data.metadata.info
             tmp_meta_data.update({NosqlEnum.LOGIN_TIME.value: str(datetime.now().isoformat())})
             tmp_meta_data.update({NosqlEnum.UPDATE_TIME.value: str(datetime.now().isoformat())})
-            nosql_data.update({str(data.key): data.info})
+            nosql_data.update({str(data.key): tmp_meta_data})
             self._e.info("缓存数据库插入数据成功,时间: %s", str(datetime.now().isoformat()))
             return self._write_nosql_data(nosql_data)
         except Exception as e:
