@@ -42,6 +42,11 @@ class CsvCore:
             self._key_manager: UnitEncry = encry
             self.__initialized: bool = True
 
+    @property
+    def csv_file(self) -> str:
+        if hasattr(self, "_csv"): return self._csv
+        return ""
+
     def _set_csv_meta_data(self) -> None:
         target_dir: Path = Path(__file__).parent.parent / "csv_template"
         if not target_dir.exists():
@@ -109,6 +114,8 @@ class CsvCore:
                 self._e.error("%s csv文件签名错误", LogLabelEnum.ERROR.value)
                 return False
             self._e.info("%s csv文件验证成功", LogLabelEnum.SIGNATURE.value)
+            # 记录文件路径
+            self._csv: str = csv_file
             return True
         except Exception as err:
             self._e.handle_exception(err)

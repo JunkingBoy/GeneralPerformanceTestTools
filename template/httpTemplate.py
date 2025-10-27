@@ -6,7 +6,7 @@ class HttpReqTemplate:
     method: str
     params: dict | None
     headers: dict | None
-    ssl: bool = False
+    # ssl: bool = False
 
     @property
     def info(self) -> dict:
