@@ -20,4 +20,4 @@ public_key.pem
 secret.key
 locustfile.py
 nosql/
-
+csv_data/
