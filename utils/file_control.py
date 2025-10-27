@@ -1,5 +1,8 @@
+import os
+
 from pathlib import Path
 from datetime import datetime
+from dotenv import load_dotenv
 
 from utils.logs import ExceptionLog
 
@@ -19,3 +22,13 @@ def create_output_dir(dir_name: str) -> str | None:
         e.handle_exception(err)
         e.error("创建目录失败: %s", err)
         return
+
+def get_diff_env_url(val_name: str = "") -> str:
+    load_dotenv()
+    temp_val: str = val_name.upper()
+    match temp_val:
+        case "DEV" | "TEST" | "":
+            base_url: str = f"BASE_{temp_val}_URL"
+            return os.getenv(base_url, "http://localhost:8000")
+        case _:
+            return os.getenv(temp_val, "")
