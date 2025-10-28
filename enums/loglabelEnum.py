@@ -13,3 +13,5 @@ class LogLabelEnum(Enum):
     SAVE = "💾"
     SIGNATURE = "🔑"
     RETRY = "🔄"
+    COUNT = "🔢"
+    COUNT_TABLE = "📊"
