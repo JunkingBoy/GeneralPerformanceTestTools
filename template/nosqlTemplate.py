@@ -4,6 +4,7 @@ from dataclasses import dataclass
 class MetaUserData:
     password: str
     Authorization: str
+    is_occupancy: bool = False
     login_time: str | None = None
     update_time: str | None = None
 

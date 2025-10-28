@@ -4,6 +4,7 @@ class NosqlEnum(Enum):
     # 定义nosql数据拥有的字段
     PASSWORD = "password"
     AUTHORIZATION = "Authorization"
+    STATUS = "is_occupancy"
     LOGIN_TIME = "login_time"
     UPDATE_TIME = "update_time"
 
