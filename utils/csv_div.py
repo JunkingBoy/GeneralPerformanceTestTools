@@ -4,12 +4,13 @@ import copy
 import threading
 
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Sequence
 
 from utils.encry import UnitEncry
 from utils.logs import ExceptionLog
 from enums.csvEnum import CsvMetaEnum, CsvHeaderEnum
 from enums.loglabelEnum import LogLabelEnum
+from template.csvTemplate import CsvData
 
 class CsvCore:
     '''
@@ -132,15 +133,26 @@ class CsvCore:
         if not self._is_source_csv(csv_file): return []
         try:
             csv_bytes: bytes = Path(csv_file).read_bytes()
-            lines: list = csv_bytes.decode("utf-8").splitlines()
-            reader = csv.reader(lines)
-            header_list: list = []
-            row_count: int = 0
-            for row in reader:
-                row_count += 1
-                if row_count <= 3: continue
-                header_list.append(row)
-            return copy.deepcopy(header_list)
+            lines: list = csv_bytes.decode("utf-8-sig").splitlines()
+            if len(lines) < 3:
+                self._e.error("%s CSV文件行数不足", LogLabelEnum.ERROR.value)
+                return []
+            data_line: list = lines[2:]
+            reader = csv.DictReader(data_line)
+            field_headers: Sequence[str] | None = reader.fieldnames
+            if not field_headers or CsvHeaderEnum.USERNAME.value not in field_headers or CsvHeaderEnum.PASSWORD.value not in field_headers:
+                self._e.error("%s CSV文件缺少必要字段", LogLabelEnum.WARNING.value)
+                return []
+            res: list = []
+            for row_num, row in enumerate(reader, start=4): # 第三行是表头
+                tmp_p: str = (row.get(CsvHeaderEnum.USERNAME.value, "").strip())
+                tmp_password: str = (row.get(CsvHeaderEnum.PASSWORD.value, "").strip())
+
+                if not tmp_p or not tmp_password:
+                    self._e.info("%s CSV文件第%s行数据不完整", LogLabelEnum.INFO.value, row_num)
+                    continue
+                res.append(CsvData(tmp_p, tmp_password).info)
+            return copy.deepcopy(res)
         except Exception as err:
             self._e.handle_exception(err)
             self._e.error("%s 获取csv数据失败", LogLabelEnum.ERROR.value)
@@ -165,4 +177,3 @@ class CsvOperator:
 
     def get_csv_data(self, csv_file: str) -> list:
         return self._csv_core._get_csv_data(csv_file) # type: ignore
-
