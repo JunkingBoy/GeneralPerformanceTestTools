@@ -1,4 +1,3 @@
-from typing import Self
 from dataclasses import dataclass
 
 from enums.errEnum import eEnum
@@ -12,10 +11,10 @@ class LogData:
     message: str
 
     @property
-    def info(self: Self) -> dict:
+    def info(self) -> dict:
         return self.__dict__.copy()
 
-    def __post_init__(self: Self) -> None:
+    def __post_init__(self) -> None:
         if isinstance(self.code, eEnum):
             self.message: str = self.code.err_message
             self.code = int(self.code.err_code)

@@ -97,7 +97,7 @@ class LoginAction:
             self._e.error("%s csv文件不存在", LogLabelEnum.ERROR.value)
             return
         if not str(csv_f_p).endswith(".csv"):
-            self._e.error("%s csv文件格式错误", LogLabelEnum.INFO.value)
+            self._e.error("%s csv文件格式错误", LogLabelEnum.WARNING.value)
             return
         u_d: list = self._csv.get_csv_data(str(csv_f_p))
         if not u_d:
