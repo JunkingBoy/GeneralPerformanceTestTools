@@ -37,6 +37,10 @@ class TokenPool:
             self._max_wait_seconds: int = 10
             self.__initialized: bool = True
 
+    @property
+    def pool(self) -> set:
+        return self._active_pool
+
     def _lock_atomic_token(self, username: str) -> bool:
         with TokenPool.__lock:
             curr_data: dict | None = self._nosql.get_some_nosql_data(username)
@@ -116,13 +120,13 @@ class TokenPool:
         self._e.error("获取访问令牌超时,时间: %s", str(datetime.now().isoformat()))
         return
 
-    def release_access_token(self, username: str) -> None:
-        with TokenPool.__lock:
-            if not self._cast_lock_token(username):
-                self._e.error("%s 释放访问令牌失败,时间: %s", LogLabelEnum.ERROR.value, str(datetime.now().isoformat()))
-            else:
-                self._active_pool.add(username)
-                self._e.info("%s 释放访问令牌成功,时间: %s", LogLabelEnum.SUCCESS.value, str(datetime.now().isoformat()))
+    def cast_token(self, username: str) -> None:
+        if not self._cast_lock_token(username):
+            self._e.error("%s 释放访问令牌失败,时间: %s", LogLabelEnum.ERROR.value, str(datetime.now().isoformat()))
+        else:
+            self._active_pool.add(username)
+            self._e.info("%s 释放访问令牌成功,时间: %s", LogLabelEnum.SUCCESS.value, str(datetime.now().isoformat()))
+
 
     def clear(self) -> None:
         with TokenPool.__lock: self._active_pool.clear()
