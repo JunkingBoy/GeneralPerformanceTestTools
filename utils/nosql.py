@@ -184,18 +184,18 @@ class NosqlOperator:
 
     def get_auth(self, key: str) -> str | None:
         if not self.in_nosql(key): return None
-        tmp_data: dict = self._nosql_core._get_nosql_data().copy() # type: ignore
+        tmp_data: dict = self._nosql_core._get_nosql_data() # type: ignore
         return tmp_data.get(str(key)).get("Authorization") # type: ignore
 
     def get_data_by_auth(self, auth: str) -> dict | None:
         return self._nosql_core._get_nosql_data_by_auth(auth) # type: ignore
 
     def get_all_nosql_data(self) -> dict | None:
-        return self._nosql_core._get_nosql_data().copy() # type: ignore
+        return self._nosql_core._get_nosql_data() # type: ignore
 
     def get_some_nosql_data(self, key: str) -> dict | None:
         if not self.in_nosql(key): return None
-        tmp_data: dict = self._nosql_core._get_nosql_data().copy() # type: ignore
+        tmp_data: dict = self._nosql_core._get_nosql_data() # type: ignore
         if tmp_data is None: return None
         res_data: dict | None = tmp_data.get(str(key))
         if res_data is None: return None
