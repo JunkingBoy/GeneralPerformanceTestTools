@@ -35,3 +35,10 @@ class CsvHeaderEnum(Enum):
         if not val: return False
         if val == CsvHeaderEnum.get_headers_str(): return True
         return False
+
+class CsvReadEnmum(Enum):
+    '''
+    数据写入csv文件后读取时,csv文件的元数据字段
+    '''
+    PHONE = "phone"
+    PASSWORD = "password"

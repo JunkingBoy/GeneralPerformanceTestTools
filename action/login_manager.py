@@ -12,6 +12,7 @@ from enums.nosqlEnum import NosqlEnum
 from enums.serverEnum import ServerEnum
 from enums.actionEnum import ActionEnum
 from enums.loglabelEnum import LogLabelEnum
+from enums.csvEnum import CsvReadEnmum
 from utils.logs import ExceptionLog
 from utils.csv_div import CsvOperator
 from utils.nosql import NosqlOperator
@@ -113,16 +114,16 @@ class LoginAction:
             headers={"sec-ch-ua-platform": "apitest"}
         ).info
         for u in u_d:
-            if not u[0] and not u[1]: break
+            if not u.get(CsvReadEnmum.PHONE.value) and not u.get(CsvReadEnmum.PASSWORD.value): break
             login_body: dict = {
-                "phone": u[0],
-                "password": u[1]
+                "phone": u.get(CsvReadEnmum.PHONE.value),
+                "password": u.get(CsvReadEnmum.PASSWORD.value)
             }
             req_kwargs.update({"json": login_body})
             res_data: UserData | None = self._login(req_kwargs)
             if res_data is None: continue
             else:
-                self._e.info("%s 登录成功,用户名: %s", LogLabelEnum.SUCCESS.value, u[0])
+                self._e.info("%s 登录成功,用户名: %s", LogLabelEnum.SUCCESS.value, u.get(CsvReadEnmum.PHONE.value))
                 self._nosql.insert(res_data)
 
     def retry(self, auth: str) -> None:
