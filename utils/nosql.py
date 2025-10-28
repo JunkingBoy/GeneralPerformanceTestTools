@@ -62,13 +62,13 @@ class NosqlCore:
         if not hasattr(self, "_nosql_data"): self._init_nosql()
         try:
             with open(self._nosql_file, "r", encoding="utf-8") as f: n_data: dict = json.load(f)
-            return n_data # n_data是浅拷贝结果
+            return copy.deepcopy(n_data) # 返回深拷贝
         except Exception as e:
             self._e.handle_exception(e)
             self._e.error("缓存数据库获取数据失败,失败原因: %s", e)
             return
 
-    def _get_nosql_auth_by_key(self, key: str) -> dict | None:
+    def _get_nosql_data_by_auth(self, key: str) -> dict | None:
         if not hasattr(self, "_nosql_data"): self._init_nosql()
         try:
             with open(self._nosql_file, "r", encoding="utf-8") as f: n_data: dict = json.load(f)
@@ -188,7 +188,7 @@ class NosqlOperator:
         return tmp_data.get(str(key)).get("Authorization") # type: ignore
 
     def get_data_by_auth(self, auth: str) -> dict | None:
-        return self._nosql_core._get_nosql_auth_by_key(auth) # type: ignore
+        return self._nosql_core._get_nosql_data_by_auth(auth) # type: ignore
 
     def get_all_nosql_data(self) -> dict | None:
         return self._nosql_core._get_nosql_data().copy() # type: ignore
@@ -198,8 +198,8 @@ class NosqlOperator:
         tmp_data: dict = self._nosql_core._get_nosql_data().copy() # type: ignore
         if tmp_data is None: return None
         res_data: dict | None = tmp_data.get(str(key))
-        if res_data:
-            res_data.setdefault("username", key)
+        if res_data is None: return None
+        else: res_data.setdefault("username", key)
         return res_data
 
     def update(self, key: str, data: MetaUserData) -> bool:
