@@ -116,8 +116,8 @@ class LoginAction:
         for u in u_d:
             if not u.get(CsvReadEnmum.PHONE.value) and not u.get(CsvReadEnmum.PASSWORD.value): break
             login_body: dict = {
-                "phone": u.get(CsvReadEnmum.PHONE.value),
-                "password": u.get(CsvReadEnmum.PASSWORD.value)
+                CsvReadEnmum.PHONE.value: u.get(CsvReadEnmum.PHONE.value),
+                CsvReadEnmum.PASSWORD.value: u.get(CsvReadEnmum.PASSWORD.value)
             }
             req_kwargs.update({"json": login_body})
             res_data: UserData | None = self._login(req_kwargs)
@@ -146,8 +146,8 @@ class LoginAction:
         username: str = list(ret_data.keys())[0]
         password: str = ret_data.get(username).get(NosqlEnum.PASSWORD.value) # type: ignore
         login_body: dict = {
-            "phone": username,
-            "password": password
+            CsvReadEnmum.PHONE.value: username,
+            CsvReadEnmum.PASSWORD.value: password
         }
         req_kwargs.update({"json": login_body})
         res_data: UserData | None = self._login(req_kwargs)

@@ -1,4 +1,5 @@
 import time
+import copy
 import random
 import threading
 
@@ -39,7 +40,7 @@ class TokenPool:
 
     @property
     def pool(self) -> set:
-        return self._active_pool
+        return copy.deepcopy(self._active_pool)
 
     def _lock_atomic_token(self, username: str) -> bool:
         with TokenPool.__lock:
