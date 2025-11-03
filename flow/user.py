@@ -1,4 +1,3 @@
-from typing import Any
 from locust import HttpUser, task, between
 
 from enums.loglabelEnum import LogLabelEnum
