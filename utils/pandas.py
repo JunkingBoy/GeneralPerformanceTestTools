@@ -22,12 +22,15 @@ class InsertManager:
                 if not InsertManager.__instance: InsertManager.__instance = InsertManager()
             return InsertManager.__instance
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        e: ExceptionLog = ExceptionLog.get_instance()
+    ) -> None:
         if hasattr(self, "_initialized") and self._initialized:
             return
         else:
             self._test_result_bf: pd.DataFrame = pd.DataFrame()
-            self._e: ExceptionLog = ExceptionLog()
+            self._e: ExceptionLog = e
             self._initialized: bool = True
 
     @property
@@ -61,7 +64,7 @@ class InsertManager:
             return
 
         _, ext = os.path.splitext(file_path)
-        supported_exts = [".xlsx", ".xls", ".csv"]
+        supported_exts: list = [".xlsx", ".xls", ".csv"]
 
         if ext.lower() not in supported_exts:
             self._e.error("不支持的文件格式: %s", ext)

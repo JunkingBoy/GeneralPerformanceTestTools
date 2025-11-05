@@ -21,3 +21,5 @@ secret.key
 locustfile.py
 nosql/
 csv_data/
+tmp_test.py
+test.txt
