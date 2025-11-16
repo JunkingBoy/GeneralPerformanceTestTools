@@ -1,12 +1,11 @@
-import os
 import requests
 import threading
 
 from pathlib import Path
 from typing import Optional
 
-from template.nosqlTemplate import UserData, MetaUserData
-from template.httpTemplate import HttpReqTemplate
+from template.nosqlTemplate import UserData
+from template.httpTemplate import StandardReqDataTemplate
 
 from enums.nosqlEnum import NosqlEnum
 from enums.serverEnum import ServerEnum
@@ -16,12 +15,15 @@ from enums.csvEnum import CsvReadEnmum
 from utils.logs import ExceptionLog
 from utils.csv_div import CsvOperator
 from utils.nosql import NosqlOperator
-from utils.file_control import get_diff_env_url
+from utils.file import get_env_val
+from utils.request import RequestAction
+from check.standar import standard_normal_check
 
 class LoginAction:
     '''
     TODO:
-    1.重新设计登录逻辑.可以封装成一个方法
+    1.重新设计登录逻辑.可以封装成一个方法 - 登录逻辑的问题是耦合太严重
+    2.这个类本身应该是一个组装工厂,依赖下层提供的方法进行数据组装实现读取数据、登录、数据写入的功能
     管理用户登录
     1.从csv读取用户信息
     2.通过定义的模板类进行用户登录
@@ -52,41 +54,6 @@ class LoginAction:
             self._nosql: NosqlOperator = nosql
             self.__initialized: bool = True
 
-    def _login(self, req_kwargs: dict) -> UserData | None:
-        if not req_kwargs:
-            self._e.error("%s 请求参数错误", LogLabelEnum.ERROR.value)
-            return
-        with requests.request(**req_kwargs) as r:
-            if r.status_code != 200:
-                self._e.error("%s 请求失败", LogLabelEnum.ERROR.value)
-                return
-            else:
-                try:
-                    resp: dict = r.json()
-                    res_code: int = resp.get("code", 0)
-                    if res_code != ServerEnum.SUCCESS.value:
-                        self._e.error("%s 登录失败,服务端状态码: %s", LogLabelEnum.ERROR.value, res_code)
-                        return
-                    self._e.info("%s 用户登录成功", LogLabelEnum.SUCCESS.value)
-                    auth: str = resp.get("data", {}).get("token")
-                    username: str = req_kwargs.get("json", {}).get("phone")
-                    password: str = req_kwargs.get("json", {}).get("password")
-                    if not auth:
-                        self._e.error("%s 用户登录成功,获取token失败", LogLabelEnum.INFO.value)
-                        return
-                    ins_data: UserData = UserData(
-                        username=username,
-                        metadata=MetaUserData(
-                            password=password,
-                            Authorization=auth
-                        )
-                    )
-                    return ins_data
-                except Exception as err:
-                    self._e.handle_exception(err)
-                    self._e.error("%s 登录失败,失败原因: %s", LogLabelEnum.ERROR.value, err)
-                    return
-
     def action_login(self) -> None:
         # 通过csv获取用户数据
         csv_p: Path = Path(__file__).parent.parent / "csv_data"
@@ -94,7 +61,7 @@ class LoginAction:
             self._e.error("%s csv文件目录不存在", LogLabelEnum.ERROR.value)
             return
         csv_f_p: Path = csv_p / "csv_user_data.csv"
-        if not csv_f_p.exists() or not os.path.isfile(csv_f_p):
+        if not csv_f_p.exists() or not csv_f_p.is_file():
             self._e.error("%s csv文件不存在", LogLabelEnum.ERROR.value)
             return
         if not str(csv_f_p).endswith(".csv"):
@@ -105,22 +72,26 @@ class LoginAction:
             self._e.error("%s csv文件数据为空", LogLabelEnum.INFO.value)
             return
         # 调用requests进行登录
-        host: str = get_diff_env_url()
+        host: str | None = get_env_val()
         uri: str = f"{host}{ActionEnum.LOGIN_TEST.value}"
-        req_kwargs: dict = HttpReqTemplate(
-            url=uri,
-            method="POST",
-            params=None,
-            headers={"sec-ch-ua-platform": "apitest"}
-        ).info
         for u in u_d:
             if not u.get(CsvReadEnmum.PHONE.value) and not u.get(CsvReadEnmum.PASSWORD.value): break
             login_body: dict = {
                 CsvReadEnmum.PHONE.value: u.get(CsvReadEnmum.PHONE.value),
                 CsvReadEnmum.PASSWORD.value: u.get(CsvReadEnmum.PASSWORD.value)
             }
-            req_kwargs.update({"json": login_body})
-            res_data: UserData | None = self._login(req_kwargs)
+            req_data: StandardReqDataTemplate = StandardReqDataTemplate(
+                url=uri,
+                method="POST",
+                params=None,
+                headers={"sec-ch-ua-platform": "apitest"},
+                form=None,
+                body=login_body
+            )
+            req: RequestAction = RequestAction(self._e)
+            resp: tuple | None = req.request_meta(req_data)
+            if resp is None: continue
+            res_data: UserData | None = standard_normal_check(resp[0], resp[1], resp[2])
             if res_data is None: continue
             else:
                 self._e.info("%s 登录成功,用户名: %s", LogLabelEnum.SUCCESS.value, u.get(CsvReadEnmum.PHONE.value))
@@ -135,23 +106,31 @@ class LoginAction:
             self._e.error("%s token不在数据库中", LogLabelEnum.INFO.value)
             return
         # 调用requests进行登录
-        host: str = get_diff_env_url()
+        host: str | None = get_env_val()
         uri: str = f"{host}{ActionEnum.LOGIN_TEST.value}"
-        req_kwargs: dict = HttpReqTemplate(
-            url=uri,
-            method="POST",
-            params=None,
-            headers={"sec-ch-ua-platform": "apitest"}
-        ).info
         username: str = list(ret_data.keys())[0]
         password: str = ret_data.get(username).get(NosqlEnum.PASSWORD.value) # type: ignore
         login_body: dict = {
             CsvReadEnmum.PHONE.value: username,
             CsvReadEnmum.PASSWORD.value: password
         }
-        req_kwargs.update({"json": login_body})
-        res_data: UserData | None = self._login(req_kwargs)
-        if res_data is None: return
+        req_data: StandardReqDataTemplate = StandardReqDataTemplate(
+            url=uri,
+            method="POST",
+            params=None,
+            headers={"sec-ch-ua-platform": "apitest"},
+            form=None,
+            body=login_body
+        )
+        req: RequestAction = RequestAction(self._e)
+        resp: tuple | None = req.request_meta(req_data)
+        if resp is None:
+            self._e.error("%s 重登失败,请检查网络", LogLabelEnum.ERROR.value)
+            return
+        res_data: UserData | None = standard_normal_check(resp[0], resp[1], resp[2])
+        if res_data is None:
+            self._e.error("%s 重登请求成功,业务响应校验失败", LogLabelEnum.ERROR.value)
+            return
         else:
             self._e.info("%s 重登成功,用户名: %s", LogLabelEnum.RETRY.value, username)
             self._nosql.update(username, res_data.metadata)

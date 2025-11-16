@@ -4,10 +4,10 @@ from enums.loglabelEnum import LogLabelEnum
 from enums.nosqlEnum import NosqlEnum
 from utils.logs import ExceptionLog
 from utils.nosql_pool import TokenPool
-from utils.file_control import get_diff_env_url
+from utils.file import get_env_val
 
 class BrowseOnly(HttpUser):
-    host: str | None = get_diff_env_url()
+    host: str | None = get_env_val()
     wait_time = between(0, 5) # constant(2)为固定时间执行动作
 
     def __init__(

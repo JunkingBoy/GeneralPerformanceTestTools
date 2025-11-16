@@ -1,11 +1,6 @@
 from enum import Enum
 from typing import Self
 
-'''
-专门的错误枚举类
-包括错误的code码和message
-'''
-
 class eEnum(Enum):
     OSFAIL = (5001, "操作系统错误")
     IOFAIL = (5002, "IO错误")
