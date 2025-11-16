@@ -1,4 +1,5 @@
 import os
+import copy
 import threading
 import pandas as pd
 
@@ -44,7 +45,7 @@ class InsertManager:
         if not isinstance(result, dict):
             self._e.error("参数类型错误: %s", type(result))
             return
-        temp_dict: dict = result.copy()
+        temp_dict: dict = copy.deepcopy(result)
         with self.__lock:
             new_entry: pd.DataFrame = pd.DataFrame(
                 [temp_dict]

@@ -5,22 +5,32 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 from utils.logs import ExceptionLog
+from enums.loglabelEnum import LogLabelEnum
 
-def create_output_dir(dir_name: str) -> str | None:
+def create_dir(
+    dir_name: str,
+    need_date: bool = True
+) -> str | None:
     e: ExceptionLog = ExceptionLog.get_instance()
     if not dir_name:
-        e.error("创建目录失败：目录名不能为空")
+        e.info("%s 目录名称为空: %s", LogLabelEnum.INFO.value, dir_name)
         return
     try:
-        parent_dir: Path = Path(__file__).parent.parent / dir_name
+        cur_dir: Path = Path.cwd()
+        dir_path: Path = cur_dir.joinpath(dir_name)
+        if not need_date:
+            dir_path.mkdir(parents=True, exist_ok=True)
+            e.info("%s 创建目录成功: %s", LogLabelEnum.SUCCESS.value, dir_name)
+            return dir_path.as_posix()
         today: str = datetime.now().strftime("%Y%m%d")
-        real_dir: Path = parent_dir / today # 类型转换了
-        if not real_dir.exists(): real_dir.mkdir(parents=True, exist_ok=True)
-        e.info("创建目录成功: %s", real_dir)
-        return str(real_dir)
+        tar_path: Path = dir_path.joinpath(today)
+        if not tar_path.exists():
+            tar_path.mkdir(parents=True, exist_ok=True)
+            e.info("%s 创建目录成功: %s", LogLabelEnum.SUCCESS.value, tar_path.as_posix())
+        return tar_path.as_posix()
     except Exception as err:
         e.handle_exception(err)
-        e.error("创建目录失败: %s", err)
+        e.error("%s 创建目录失败: %s", LogLabelEnum.ERROR.value, dir_name)
         return
 
 def get_env_val(env_key: str = "zt") -> str | None:
