@@ -23,12 +23,13 @@ def create_output_dir(dir_name: str) -> str | None:
         e.error("创建目录失败: %s", err)
         return
 
-def get_diff_env_url(val_name: str = "") -> str:
+def get_env_val(env_key: str = "zt") -> str | None:
     load_dotenv()
-    temp_val: str = val_name.upper()
+    if not env_key: temp_val: str = ""
+    else: temp_val: str = env_key.upper()
     match temp_val:
-        case "DEV" | "TEST" | "":
-            base_url: str = f"BASE_{temp_val}_URL"
-            return os.getenv(base_url, "http://localhost:8000")
+        case "ZT":
+            host: str = "LQZENTAOHOST"
+            return os.getenv(host, "http://localhost:8000")
         case _:
             return os.getenv(temp_val, "")
