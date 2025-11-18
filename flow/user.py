@@ -26,6 +26,7 @@ class BrowseOnly(HttpUser):
             self.stop()
             return
         user, auth_token = result
+        self.__user_pool.append(user)
         self._headers.setdefault(NosqlEnum.AUTHORIZATION.value, auth_token)
         self._headers.setdefault("sec-ch-ua-platform", "apitest")
         self.client.headers.update(self._headers)
