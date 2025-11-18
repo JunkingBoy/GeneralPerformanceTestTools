@@ -9,7 +9,7 @@ from enums.serverEnum import ServerEnum
 
 class BrowseOnly(HttpUser):
     # 多实例共享同一个用户池
-    __user_pool: list = []
+    __user_pool: set = set()
     host: str | None = get_env_val()
     wait_time = between(0, 5) # constant(2)为固定时间执行动作
 
@@ -26,7 +26,7 @@ class BrowseOnly(HttpUser):
             self.stop()
             return
         user, auth_token = result
-        self.__user_pool.append(user)
+        self.__user_pool.add(user)
         self._headers.setdefault(NosqlEnum.AUTHORIZATION.value, auth_token)
         self._headers.setdefault("sec-ch-ua-platform", "apitest")
         self.client.headers.update(self._headers)

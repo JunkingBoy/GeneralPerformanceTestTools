@@ -135,10 +135,10 @@ class StandardTokenManager:
     def cast_token(self, username: str) -> None:
         with StandardTokenManager.__lock:
             if not self._cast_lock_token(username):
-                self._e.error("%s 释放访问令牌失败,时间: %s", LogLabelEnum.ERROR.value, str(datetime.now().isoformat()))
+                self._e.error("%s 用户: %s 释放访问令牌失败,时间: %s", LogLabelEnum.ERROR.value, username, str(datetime.now().isoformat()))
             else:
                 self._active_pool.add(username)
-                self._e.info("%s 释放访问令牌成功,时间: %s", LogLabelEnum.SUCCESS.value, str(datetime.now().isoformat()))
+                self._e.info("%s 用户: %s 释放访问令牌成功,时间: %s", LogLabelEnum.SUCCESS.value, username, str(datetime.now().isoformat()))
 
     def clear(self) -> None:
         with StandardTokenManager.__lock: self._active_pool.clear()
