@@ -3,7 +3,7 @@ from locust import HttpUser, task, between
 from enums.loglabelEnum import LogLabelEnum
 from enums.nosqlEnum import NosqlEnum
 from utils.logs import ExceptionLog
-from utils.manager import TokenPool
+from utils.manager import StandardTokenManager
 from utils.file import get_env_val
 from enums.serverEnum import ServerEnum
 
@@ -17,7 +17,7 @@ class BrowseOnly(HttpUser):
         super().__init__(*args, **kwargs)
         self._e: ExceptionLog = ExceptionLog.get_instance()
         self._headers: dict = {}
-        self._token_pool: TokenPool = TokenPool.get_instance()
+        self._token_pool: StandardTokenManager = StandardTokenManager.get_instance()
 
     def on_start(self) -> None:
         result: tuple | None = self._token_pool.get_access_token()

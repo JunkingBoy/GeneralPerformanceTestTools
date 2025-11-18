@@ -13,17 +13,17 @@ from template.nosqlTemplate import MetaUserData
 from utils.logs import ExceptionLog
 from utils.nosql import NosqlOperator
 
-class TokenPool:
-    __instance: Optional['TokenPool'] = None
+class StandardTokenManager:
+    __instance: Optional['StandardTokenManager'] = None
     __lock: Semaphore = gevent.lock.Semaphore()
 
     @staticmethod
-    def get_instance() -> 'TokenPool':
-        if TokenPool.__instance: return TokenPool.__instance
+    def get_instance() -> 'StandardTokenManager':
+        if StandardTokenManager.__instance: return StandardTokenManager.__instance
         else:
-            with TokenPool.__lock:
-                if not TokenPool.__instance: TokenPool.__instance = TokenPool()
-            return TokenPool.__instance
+            with StandardTokenManager.__lock:
+                if not StandardTokenManager.__instance: StandardTokenManager.__instance = StandardTokenManager()
+            return StandardTokenManager.__instance
 
     def __init__(
         self,
@@ -97,7 +97,7 @@ class TokenPool:
         s_time: float = time.time()
         while time.time() - s_time < timeout:
             # 从活跃池中取数据 - 只有一个协程可以从活跃池取数据
-            with TokenPool.__lock:
+            with StandardTokenManager.__lock:
                 if self._active_pool:
                     result: tuple | None = self._random_token()
                     if result is not None:
@@ -122,7 +122,7 @@ class TokenPool:
                     candidates.add(username)
 
             # 更新原先活跃池 - 只有一个协程可以更新活跃池
-            with TokenPool.__lock: self._active_pool = candidates.copy()
+            with StandardTokenManager.__lock: self._active_pool = candidates.copy()
             self._e.info("%s 从数据库加载 %d 个空闲用户到活跃池", LogLabelEnum.COUNT_TABLE.value, len(candidates))
             result: tuple | None = self._random_token()
             if result is not None:
@@ -133,7 +133,7 @@ class TokenPool:
         return
 
     def cast_token(self, username: str) -> None:
-        with TokenPool.__lock:
+        with StandardTokenManager.__lock:
             if not self._cast_lock_token(username):
                 self._e.error("%s 释放访问令牌失败,时间: %s", LogLabelEnum.ERROR.value, str(datetime.now().isoformat()))
             else:
@@ -141,4 +141,4 @@ class TokenPool:
                 self._e.info("%s 释放访问令牌成功,时间: %s", LogLabelEnum.SUCCESS.value, str(datetime.now().isoformat()))
 
     def clear(self) -> None:
-        with TokenPool.__lock: self._active_pool.clear()
+        with StandardTokenManager.__lock: self._active_pool.clear()
