@@ -15,3 +15,5 @@ class LogLabelEnum(Enum):
     RETRY = "🔄"
     COUNT = "🔢"
     COUNT_TABLE = "📊"
+    GREENLIGHT = "🟢"
+    REDLIGHT = "🔴"

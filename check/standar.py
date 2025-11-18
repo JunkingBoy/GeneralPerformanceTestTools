@@ -29,7 +29,7 @@ def standard_normal_check(
         case dict() as resp:
             res_code: int = resp.get("code", 0)
             if res_code != ServerEnum.SUCCESS.value:
-                e.error("%s 登录失败,服务端状态码: %s", LogLabelEnum.ERROR.value, res_code)
+                e.error("%s 登录失败,服务端状态码: %s, 响应数据: %s", LogLabelEnum.ERROR.value, res_code, parse_resp)
                 return
             e.info("%s 用户登录成功", LogLabelEnum.SUCCESS.value)
             auth: str = resp.get("data", {}).get("token")

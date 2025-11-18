@@ -33,7 +33,7 @@ def create_dir(
         e.error("%s 创建目录失败: %s", LogLabelEnum.ERROR.value, dir_name)
         return
 
-def get_env_val(env_key: str = "zt") -> str | None:
+def get_env_val(env_key: str = "zt") -> str:
     load_dotenv()
     if not env_key: temp_val: str = ""
     else: temp_val: str = env_key.upper()
