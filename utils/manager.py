@@ -83,7 +83,14 @@ class TokenPool:
             self._e.error("%s 锁定用户失败,用户ID: %s, 时间: %s", LogLabelEnum.ERROR.value, chose_username, str(datetime.now().isoformat()))
             return
         self._active_pool.discard(chose_username)
-        self._e.info("%s 【随机选择】从 %s 个用户中选中成功取出活跃池用户: %s, 池剩余: %s", LogLabelEnum.SUCCESS.value, len(self._active_pool), chose_username, self._active_pool)
+        self._e.info(
+            "%s 【随机选择】从 %s 个用户中选中成功取出活跃池用户: %s, 池剩余活跃用户数: %s, 用户数据是: %s",
+            LogLabelEnum.SUCCESS.value,
+            len(self._active_pool) + 1,
+            chose_username,
+            len(self._active_pool),
+            self._active_pool
+        )
         return chose_username, self._nosql.get_auth(chose_username)
 
     def get_access_token(self, timeout: float = 10.0) -> tuple | None:
