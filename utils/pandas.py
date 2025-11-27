@@ -46,7 +46,7 @@ class InsertManager:
             self._e.error("参数类型错误: %s", type(result))
             return
         temp_dict: dict = copy.deepcopy(result)
-        with self.__lock:
+        with InsertManager.__lock:
             new_entry: pd.DataFrame = pd.DataFrame(
                 [temp_dict]
             )
